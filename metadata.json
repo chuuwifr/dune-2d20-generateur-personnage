@@ -1,0 +1,6 @@
+{
+  "name": "Dune 2d20 - Créateur de Personnage & Arrakis Codex",
+  "description": "Assistant de création de personnage officiel pour Dune : Aventures dans l'Imperium (système 2d20). Gestion automatique des règles, traits, générateur d'historique et export PDF.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
