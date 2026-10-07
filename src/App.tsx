@@ -9,7 +9,6 @@ import { DiceSimulatorModal } from './components/DiceSimulatorModal';
 import { PdfExportModal } from './components/PdfExportModal';
 import { RulesCheatSheetModal } from './components/RulesCheatSheetModal';
 import { PresetsModal } from './components/PresetsModal';
-import { GeminiChatbotModal } from './components/GeminiChatbotModal';
 import { 
   Sparkles, 
   Dices, 
@@ -18,8 +17,7 @@ import {
   BookOpen, 
   Scroll, 
   Wand2, 
-  Shield,
-  Bot
+  Shield
 } from 'lucide-react';
 
 export default function App() {
@@ -36,21 +34,11 @@ export default function App() {
   const [isBackstoryModalOpen, setIsBackstoryModalOpen] = useState(false);
   const [isPresetsModalOpen, setIsPresetsModalOpen] = useState(false);
 
-  // Chatbot modal state
-  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
-  const [chatInitialPrompt, setChatInitialPrompt] = useState<string | undefined>(undefined);
-
   // Quick dice test trigger from character sheet
   const handleOpenDiceTest = (skill?: SkillName, principle?: PrincipleName) => {
     if (skill) setDiceModalSkill(skill);
     if (principle) setDiceModalPrinciple(principle);
     setIsDiceModalOpen(true);
-  };
-
-  // Open Chatbot with optional pre-filled prompt (e.g. for generating names)
-  const handleOpenChatbot = (prompt?: string) => {
-    setChatInitialPrompt(prompt);
-    setIsChatModalOpen(true);
   };
 
   return (
@@ -71,7 +59,6 @@ export default function App() {
         openDiceModal={() => handleOpenDiceTest()}
         openPdfModal={() => setIsPdfModalOpen(true)}
         openRulesModal={() => setIsRulesModalOpen(true)}
-        openChatModal={() => handleOpenChatbot()}
         characterName={character.name}
       />
 
@@ -92,7 +79,6 @@ export default function App() {
             onOpenDiceTest={handleOpenDiceTest}
             onOpenBackstoryGen={() => setIsBackstoryModalOpen(true)}
             onOpenWizard={() => setCurrentView('wizard')}
-            onOpenChatbot={handleOpenChatbot}
           />
         )}
 
@@ -102,7 +88,6 @@ export default function App() {
             setCharacter={setCharacter}
             onFinishWizard={() => setCurrentView('sheet')}
             onOpenBackstoryGen={() => setIsBackstoryModalOpen(true)}
-            onOpenChatbot={handleOpenChatbot}
           />
         )}
       </main>
@@ -254,14 +239,6 @@ export default function App() {
           setCharacter(newChar);
           setCurrentView('sheet');
         }}
-      />
-
-      <GeminiChatbotModal
-        isOpen={isChatModalOpen}
-        onClose={() => setIsChatModalOpen(false)}
-        character={character}
-        setCharacter={setCharacter}
-        initialPrompt={chatInitialPrompt}
       />
     </div>
   );

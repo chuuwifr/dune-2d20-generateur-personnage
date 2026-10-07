@@ -38,7 +38,7 @@ import {
   Plus,
   Trash2,
   Dice5,
-  Bot
+  Dices
 } from 'lucide-react';
 
 interface CreationWizardProps {
@@ -46,7 +46,6 @@ interface CreationWizardProps {
   setCharacter: React.Dispatch<React.SetStateAction<DuneCharacter>>;
   onFinishWizard: () => void;
   onOpenBackstoryGen: () => void;
-  onOpenChatbot?: (prompt?: string) => void;
 }
 
 export const CreationWizard: React.FC<CreationWizardProps> = ({
@@ -54,7 +53,6 @@ export const CreationWizard: React.FC<CreationWizardProps> = ({
   setCharacter,
   onFinishWizard,
   onOpenBackstoryGen,
-  onOpenChatbot,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -1014,16 +1012,18 @@ export const CreationWizard: React.FC<CreationWizardProps> = ({
                   <label className="text-xs font-cinzel font-bold text-[#fae5b5] uppercase tracking-wider block">
                     Nom complet :
                   </label>
-                  {onOpenChatbot && (
-                    <button
-                      type="button"
-                      onClick={() => onOpenChatbot(`Génère 5 noms nobles et authentiques pour mon personnage (${character.archetype}, ${character.vocation}, au service de la ${character.house.name}). Explique leur origine.`)}
-                      className="text-[11px] text-[#d4a34b] hover:text-[#fae5b5] flex items-center space-x-1 font-semibold transition-colors"
-                    >
-                      <Bot className="w-3.5 h-3.5" />
-                      <span>Générer avec le Chatbot IA</span>
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const gen = generateRandomName(character.gender === 'Homme' ? 'Homme' : 'Femme');
+                      setCharacter((prev) => ({ ...prev, name: gen.name }));
+                    }}
+                    className="text-[11px] text-[#d4a34b] hover:text-[#fae5b5] flex items-center space-x-1 font-semibold transition-colors"
+                    title="Générer un nom aléatoire issu de l'univers de Dune"
+                  >
+                    <Dices className="w-3.5 h-3.5" />
+                    <span>Générer un nom</span>
+                  </button>
                 </div>
                 <input
                   type="text"

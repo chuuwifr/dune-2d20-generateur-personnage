@@ -16,8 +16,7 @@ import {
   Award, 
   ShieldAlert, 
   Eye, 
-  KeyRound,
-  Bot
+  KeyRound
 } from 'lucide-react';
 
 interface BackgroundGeneratorModalProps {
@@ -41,8 +40,6 @@ export const BackgroundGeneratorModal: React.FC<BackgroundGeneratorModalProps> =
 
   const [suggestedName, setSuggestedName] = useState(() => character.name || generateRandomName('Femme').name);
   const [copied, setCopied] = useState(false);
-  const [isAiGenerating, setIsAiGenerating] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -71,57 +68,6 @@ Physiquement, il se distingue par ${updated.distinctiveFeature.toLowerCase()}
 Il conserve précieusement avec lui ${updated.trinket.toLowerCase()}, symbole des serments prêtés et des épreuves traversées dans les sables de l’Imperium.`;
       return updated;
     });
-  };
-
-  // Optional AI enrichment using Gemini API via server route
-  const handleGenerateAiLore = async () => {
-    try {
-      setIsAiGenerating(true);
-      setAiError(null);
-
-      const prompt = `Tu es un archiviste impérial et auteur de l'univers de Frank Herbert pour le jeu de rôle Dune : Aventures dans l'Imperium.
-Rédige un historique immersif, poétique et sombre pour ce personnage :
-- Nom : ${character.name || suggestedName}
-- Vocation : ${character.vocation}
-- Archétype : ${character.archetype}
-- Maison : ${character.house.name} (${character.house.reputationTrait})
-- Monde d'origine : ${currentBackstory.originPlanet}
-- Statut : ${currentBackstory.birthStatus}
-- Événement formateur : ${currentBackstory.formativeEvent}
-- Secret / Dette : ${currentBackstory.darkSecretOrDebt}
-
-Fournis un texte narratif en français d'environ 3 à 4 paragraphes, empreint du style littéraire de Frank Herbert (faufreluches, épice, dangers, maximes impériales).`;
-
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', text: prompt }],
-          systemInstruction: "Tu es un archiviste officiel de l'univers de Dune (Frank Herbert). Tu rédiges avec le style épique, littéraire et solennel des chroniques de la Princesse Irulan.",
-          model: 'gemini-3.5-flash',
-          temperature: 0.85,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Erreur de génération');
-      }
-
-      const data = await res.json();
-      const text = data.reply || '';
-      if (text) {
-        setCurrentBackstory((prev) => ({
-          ...prev,
-          fullNarrative: text.trim(),
-        }));
-      }
-    } catch (err: any) {
-      console.warn('Erreur lors de la génération avec le serveur:', err);
-      setAiError('Génération locale appliquée.');
-      handleGenerateAll();
-    } finally {
-      setIsAiGenerating(false);
-    }
   };
 
   // Apply to character sheet
@@ -181,19 +127,10 @@ Fournis un texte narratif en français d'environ 3 à 4 paragraphes, empreint du
                 <Dices className="w-4 h-4" />
                 <span>Tout Relancer Aléatoirement</span>
               </button>
-
-              <button
-                onClick={handleGenerateAiLore}
-                disabled={isAiGenerating}
-                className="px-3 py-1.5 rounded-lg bg-[#291f14] hover:bg-[#3b2b1a] text-[#d4a34b] border border-[#5a4224] text-xs font-semibold flex items-center space-x-1.5 disabled:opacity-50"
-              >
-                <Bot className="w-4 h-4" />
-                <span>{isAiGenerating ? 'Génération...' : 'Enrichir Style Roman'}</span>
-              </button>
             </div>
 
             <div className="text-[11px] text-[#a89885] italic">
-              {aiError && <span className="text-amber-400">{aiError}</span>}
+              Historique et traits conformes aux règles de Dune 2d20
             </div>
           </div>
 

@@ -7,8 +7,7 @@ import {
   BookOpen, 
   Wand2, 
   Compass,
-  Users,
-  Bot
+  Users
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -17,7 +16,6 @@ interface HeaderProps {
   openDiceModal: () => void;
   openPdfModal: () => void;
   openRulesModal: () => void;
-  openChatModal: () => void;
   characterName: string;
 }
 
@@ -27,7 +25,6 @@ export const Header: React.FC<HeaderProps> = ({
   openDiceModal,
   openPdfModal,
   openRulesModal,
-  openChatModal,
   characterName,
 }) => {
   return (
@@ -111,15 +108,6 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Quick Actions Right */}
           <div className="flex items-center space-x-2">
             <button
-              onClick={openChatModal}
-              title="Discuter avec le Conseiller Mentat IA pour générer des noms et secrets"
-              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-gradient-to-r from-[#291b10] to-[#3a2614] hover:from-[#3d2716] hover:to-[#4f341b] text-[#fae5b5] border border-[#c99738]/60 text-xs sm:text-sm flex items-center space-x-1.5 transition-all shadow-md group"
-            >
-              <Bot className="w-4 h-4 text-[#d4a34b] group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline font-cinzel font-bold">Chatbot IA</span>
-            </button>
-
-            <button
               onClick={openDiceModal}
               title="Lancer un test 2d20"
               className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-[#261f17] hover:bg-[#382b1c] text-[#fae5b5] border border-[#c99738]/40 text-xs sm:text-sm flex items-center space-x-1.5 transition-all shadow-md group"
@@ -151,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="md:hidden flex items-center justify-around py-2 border-t border-[#292218] overflow-x-auto space-x-1">
           <button
             onClick={() => setCurrentView('sheet')}
-            className={`px-2 py-1 rounded text-xs whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded text-xs whitespace-nowrap ${
               currentView === 'sheet' ? 'bg-[#c99738]/20 text-[#fae5b5] font-semibold' : 'text-[#a89885]'
             }`}
           >
@@ -159,21 +147,15 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
           <button
             onClick={() => setCurrentView('wizard')}
-            className={`px-2 py-1 rounded text-xs whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded text-xs whitespace-nowrap ${
               currentView === 'wizard' ? 'bg-[#c99738]/20 text-[#fae5b5] font-semibold' : 'text-[#a89885]'
             }`}
           >
             Créateur
           </button>
           <button
-            onClick={openChatModal}
-            className="px-2 py-1 rounded text-xs whitespace-nowrap text-[#d4a34b] font-semibold bg-[#2a1c10] border border-[#523d24]"
-          >
-            Chatbot IA
-          </button>
-          <button
             onClick={() => setCurrentView('generator')}
-            className={`px-2 py-1 rounded text-xs whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded text-xs whitespace-nowrap ${
               currentView === 'generator' ? 'bg-[#c99738]/20 text-[#fae5b5] font-semibold' : 'text-[#a89885]'
             }`}
           >
@@ -181,7 +163,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
           <button
             onClick={() => setCurrentView('presets')}
-            className={`px-2 py-1 rounded text-xs whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded text-xs whitespace-nowrap ${
               currentView === 'presets' ? 'bg-[#c99738]/20 text-[#fae5b5] font-semibold' : 'text-[#a89885]'
             }`}
           >

@@ -75,17 +75,23 @@ const TRINKETS = [
 
 const FIRST_NAMES_MALE = [
   'Tarek', 'Vorian', 'Darien', 'Duncan', 'Gurney', 'Miles', 'Thufir', 'Kaunos', 'Renki',
-  'Alik', 'Bionbir', 'Stilgar', 'Liet', 'Oren', 'Karr', 'Zavir', 'Jorin', 'Hadad', 'Pardot'
+  'Alik', 'Bionbir', 'Stilgar', 'Liet', 'Oren', 'Karr', 'Zavir', 'Jorin', 'Hadad', 'Pardot',
+  'Feyd', 'Rabban', 'Leto', 'Hasimir', 'Wellington', 'Cbaoth', 'Otheym', 'Jamis', 'Shimun',
+  'Tark', 'Nafud', 'Kynes', 'Vander', 'Rhombur', 'Camil', 'Soran', 'Elrood', 'Shando'
 ];
 
 const FIRST_NAMES_FEMALE = [
   'Kara', 'Chani', 'Catriona', 'Elinor', 'Faroula', 'Honora', 'Irulan', 'Jessica', 'Lina',
-  'Murbella', 'Peronel', 'Roya', 'Silandra', 'Talaith', 'Wanna', 'Anirul', 'Dalia', 'Siona'
+  'Murbella', 'Peronel', 'Roya', 'Silandra', 'Talaith', 'Wanna', 'Anirul', 'Dalia', 'Siona',
+  'Harah', 'Ghanima', 'Alia', 'Margot', 'Lucilla', 'Tessia', 'Wensicia', 'Chalice', 'Kareefa',
+  'Tamalane', 'Bellonda', 'Shadout', 'Ramallo', 'Vivia', 'Iriana', 'Savannah', 'Yueh'
 ];
 
 const FAMILY_NAMES = [
   'Molay', 'Atréides', 'Harkonnen', 'Corrino', 'Vernius', 'Richese', 'Ferreyra', 'Moritani',
-  'Hawat', 'Ghurani', 'Kynes', 'Vinal', 'Metzos', 'Terro', 'Antaya', 'Pilru', 'Rund', 'Dinari'
+  'Hawat', 'Ghurani', 'Kynes', 'Vinal', 'Metzos', 'Terro', 'Antaya', 'Pilru', 'Rund', 'Dinari',
+  'Fenring', 'Yueh', 'Mapes', 'Idaho', 'Halleck', 'Teg', 'Novi', 'Varan', 'Ecazi', 'Ginaz',
+  'Taraza', 'Nodong', 'Talani', 'Boro', 'Sardau', 'Grumman', 'Corrin', 'Caladan'
 ];
 
 export function getRandomElement<T>(array: T[]): T {

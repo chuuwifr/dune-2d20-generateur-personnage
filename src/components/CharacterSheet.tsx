@@ -18,6 +18,7 @@ import {
   SUGGESTED_MAXIMES,
   PRESET_HOUSES
 } from '../data/duneData';
+import { generateRandomName } from '../utils/backgroundGenerator';
 import { AddTalentModal } from './AddTalentModal';
 import { AddAssetModal } from './AddAssetModal';
 import { 
@@ -35,7 +36,6 @@ import {
   Bookmark, 
   Compass, 
   FileEdit, 
-  Bot,
   Pencil,
   Check,
   RotateCcw,
@@ -50,7 +50,6 @@ interface CharacterSheetProps {
   onOpenDiceTest: (skill?: SkillName, principle?: PrincipleName) => void;
   onOpenBackstoryGen: () => void;
   onOpenWizard: () => void;
-  onOpenChatbot?: (prompt?: string) => void;
 }
 
 export const CharacterSheet: React.FC<CharacterSheetProps> = ({
@@ -59,7 +58,6 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
   onOpenDiceTest,
   onOpenBackstoryGen,
   onOpenWizard,
-  onOpenChatbot,
 }) => {
   // Global Edit Mode toggle
   const [isEditMode, setIsEditMode] = useState(false);
@@ -336,17 +334,18 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
                         onChange={(e) => setCharacter((prev) => ({ ...prev, name: e.target.value }))}
                         className="flex-1 bg-[#0f1015] border border-[#523d24] rounded-lg px-3 py-1.5 text-sm text-[#fae5b5] font-cinzel font-bold focus:border-[#d4a34b] focus:outline-none"
                       />
-                      {onOpenChatbot && (
-                        <button
-                          type="button"
-                          onClick={() => onOpenChatbot(`Propose 5 nouveaux noms authentiques pour un ${character.archetype} (${character.vocation}) de la ${character.house.name}.`)}
-                          className="px-2.5 py-1 rounded bg-[#2a1c10] text-[#d4a34b] border border-[#523d24] hover:bg-[#3d2716] text-xs flex items-center space-x-1"
-                          title="Générer un nom avec le Chatbot IA"
-                        >
-                          <Bot className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">IA</span>
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const gen = generateRandomName(character.gender === 'Homme' ? 'Homme' : 'Femme');
+                          setCharacter((prev) => ({ ...prev, name: gen.name }));
+                        }}
+                        className="px-2.5 py-1 rounded bg-[#2a1c10] text-[#d4a34b] border border-[#523d24] hover:bg-[#3d2716] text-xs flex items-center space-x-1"
+                        title="Générer un nom aléatoire de l'univers de Dune"
+                      >
+                        <Dices className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Aléatoire</span>
+                      </button>
                     </div>
                   </div>
 
@@ -439,17 +438,6 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
                     <Pencil className="w-3.5 h-3.5" />
                     <span className="text-[11px] hidden sm:inline">Modifier</span>
                   </button>
-
-                  {onOpenChatbot && (
-                    <button
-                      onClick={() => onOpenChatbot(`Génère 5 suggestions de noms distinctifs et immersifs pour mon personnage (${character.archetype}, ${character.vocation}, Maison ${character.house.name}).`)}
-                      className="px-2 py-1 rounded bg-[#291f14] hover:bg-[#3d2c1c] text-[#d4a34b] border border-[#5c4021] text-xs flex items-center space-x-1 shadow transition-all"
-                      title="Générer un nom avec le Chatbot IA"
-                    >
-                      <Bot className="w-3.5 h-3.5" />
-                      <span className="text-[11px] hidden sm:inline">Nom via Chatbot</span>
-                    </button>
-                  )}
 
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#c99738]/20 text-[#d4a34b] border border-[#c99738]/40">
                     {character.archetype}
