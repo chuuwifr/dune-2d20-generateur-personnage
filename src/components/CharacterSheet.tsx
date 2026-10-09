@@ -7,7 +7,8 @@ import {
   Asset, 
   Talent,
   VocationType,
-  HouseType
+  HouseType,
+  HouseInfo
 } from '../types/dune';
 import { 
   SKILLS_INFO, 
@@ -21,6 +22,7 @@ import {
 import { generateRandomName } from '../utils/backgroundGenerator';
 import { AddTalentModal } from './AddTalentModal';
 import { AddAssetModal } from './AddAssetModal';
+import { HouseCustomizerModal } from './HouseCustomizerModal';
 import { 
   Shield, 
   Sword, 
@@ -65,6 +67,48 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
   // Modals state
   const [isAddTalentOpen, setIsAddTalentOpen] = useState(false);
   const [isAddAssetOpen, setIsAddAssetOpen] = useState(false);
+  const [isHouseModalOpen, setIsHouseModalOpen] = useState(false);
+
+  // House customization handler
+  const handleApplyHouse = (updatedHouse: HouseInfo) => {
+    const updatedTraits = character.traits.filter((t) => t.type !== 'maison');
+    updatedTraits.push({
+      id: `trait-house-${Date.now()}`,
+      name: `${updatedHouse.name} (${updatedHouse.reputationTrait})`,
+      type: 'maison',
+      effectHint: `Permet d’emprunter le trait "${updatedHouse.reputationTrait}" pour 1 Impulsion durant une scène`,
+    });
+    setCharacter((prev) => ({
+      ...prev,
+      house: updatedHouse,
+      traits: updatedTraits,
+    }));
+  };
+
+  // Borrow house trait (for 1 Momentum in play)
+  const isBorrowedHouseTraitActive = character.traits.some(
+    (t) => t.name.startsWith('Emprunt : ') && t.type === 'situationnel'
+  );
+
+  const handleToggleBorrowHouseTrait = () => {
+    if (isBorrowedHouseTraitActive) {
+      setCharacter((prev) => ({
+        ...prev,
+        traits: prev.traits.filter((t) => !(t.name.startsWith('Emprunt : ') && t.type === 'situationnel')),
+      }));
+    } else {
+      const borrowedTrait: CharacterTrait = {
+        id: `borrowed-house-trait-${Date.now()}`,
+        name: `Emprunt : ${character.house.reputationTrait} (${character.house.name})`,
+        type: 'situationnel',
+        effectHint: `Trait de Maison emprunté pour 1 Impulsion durant toute la scène en cours`,
+      };
+      setCharacter((prev) => ({
+        ...prev,
+        traits: [...prev.traits, borrowedTrait],
+      }));
+    }
+  };
 
   // Trait management state
   const [selectedTraitInfo, setSelectedTraitInfo] = useState<CharacterTrait | null>(null);
@@ -409,7 +453,17 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-mono text-[#a89885] block">Maison :</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-mono text-[#a89885] block">Maison :</label>
+                      <button
+                        type="button"
+                        onClick={() => setIsHouseModalOpen(true)}
+                        className="text-[10px] text-[#d4a34b] hover:underline flex items-center space-x-1"
+                      >
+                        <Sliders className="w-2.5 h-2.5" />
+                        <span>Personnaliser</span>
+                      </button>
+                    </div>
                     <input
                       type="text"
                       value={character.house.name}
@@ -453,8 +507,8 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
                   « {character.concept || 'Aucun concept défini'} »
                 </p>
 
-                <div className="flex flex-wrap items-center gap-4 text-xs text-[#a89885] pt-1">
-                  <span className="flex items-center space-x-1">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-[#a89885] pt-1">
+                  <span className="flex items-center space-x-1.5">
                     <Shield className="w-3.5 h-3.5 text-[#d4a34b]" />
                     <strong className="text-[#e6d8c3]">{character.house.name}</strong> ({character.house.type})
                   </span>
@@ -462,6 +516,15 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
                   <span>Monde : <strong className="text-[#e6d8c3]">{character.backstory.originPlanet || character.house.homeworld}</strong></span>
                   <span>•</span>
                   <span>Couleurs : <strong className="text-[#e6d8c3]">{character.house.colors}</strong></span>
+
+                  <button
+                    onClick={() => setIsHouseModalOpen(true)}
+                    className="px-2 py-0.5 rounded bg-[#291f14] hover:bg-[#3d2c1c] text-[#d4a34b] border border-[#5c4021] text-[11px] font-medium flex items-center space-x-1 transition-all shadow-sm"
+                    title="Personnaliser ou changer de Maison noble"
+                  >
+                    <Sliders className="w-3 h-3" />
+                    <span>Gérer la Maison</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -605,7 +668,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
 
         {/* Trait Guide */}
         {showTraitGuide && (
-          <div className="bg-[#1b1712] border border-[#5c4323] rounded-lg p-3 text-xs text-[#c9b79c] space-y-1.5 animate-fadeIn">
+          <div className="bg-[#1b1712] border border-[#5c4323] rounded-lg p-3 text-xs text-[#c9b79c] space-y-2 animate-fadeIn">
             <p className="font-semibold text-[#d4a34b] flex items-center space-x-1">
               <Sparkles className="w-3.5 h-3.5 text-[#d4a34b]" />
               <span>Règle officielle des Traits (Chapitre 5, p. 143-144) :</span>
@@ -613,9 +676,27 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
             <p>
               Un trait est toujours vrai. S’il est pertinent, il peut <strong>rendre une action possible ou impossible</strong>, ou <strong>faciliter (Difficulté -1)</strong> ou <strong>compliquer (Difficulté +1)</strong> le test.
             </p>
-            <p>
-              • <strong>Emprunt de Trait de Maison :</strong> En dépensant <strong>1 point d’Impulsion</strong>, vous pouvez emprunter le trait de votre Maison (ex: <em>{character.house.reputationTrait}</em>) pour en faire bénéficier votre alter ego durant toute la scène !
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-[#3b2d1c]">
+              <p>
+                • <strong>Emprunt de Trait de Maison :</strong> En dépensant <strong>1 point d’Impulsion</strong>, vous pouvez emprunter le trait de votre Maison (ex: <em>{character.house.reputationTrait}</em>) pour en faire bénéficier votre personnage durant toute la scène !
+              </p>
+              <button
+                type="button"
+                onClick={handleToggleBorrowHouseTrait}
+                className={`px-3 py-1 rounded text-xs font-semibold flex items-center space-x-1.5 transition-all shadow shrink-0 ${
+                  isBorrowedHouseTraitActive
+                    ? 'bg-[#8c4e1a] text-white border border-[#c99738]'
+                    : 'bg-[#291f14] hover:bg-[#3d2c1c] text-[#d4a34b] border border-[#5c4021]'
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5" />
+                <span>
+                  {isBorrowedHouseTraitActive
+                    ? `✓ Emprunt Actif : "${character.house.reputationTrait}" (Désactiver)`
+                    : `⚡ Emprunter "${character.house.reputationTrait}" (1 Impulsion)`}
+                </span>
+              </button>
+            </div>
           </div>
         )}
 
@@ -1344,16 +1425,89 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
             )}
           </div>
 
-          <div className="bg-[#18161d] p-3.5 rounded-lg border border-[#2b241b] space-y-1.5">
-            <span className="text-[11px] font-cinzel font-bold text-[#d4a34b] uppercase tracking-wider block">
-              Maison d'Allégeance
-            </span>
-            <p className="text-xs text-[#fae5b5] font-medium">
-              {character.house.name}
-            </p>
-            <p className="text-xs text-[#a89885]">
-              {character.house.primaryDomain}
-            </p>
+          <div className="bg-gradient-to-br from-[#1c1724] via-[#16131c] to-[#110f14] p-4 rounded-xl border border-[#4d3a24] shadow-md space-y-3 col-span-full">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#36271a] pb-2.5">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-9 h-9 rounded-lg bg-[#2e2013] border border-[#d4a34b]/40 flex items-center justify-center shrink-0 shadow-sm">
+                  <Shield className="w-5 h-5 text-[#d4a34b]" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-cinzel text-sm sm:text-base font-bold text-[#fae5b5]">
+                      {character.house.name}
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#3b2713] text-[#d4a34b] border border-[#5c4021]">
+                      {character.house.type}
+                    </span>
+                  </div>
+                  {character.house.motto && (
+                    <p className="text-[11px] text-[#d4a34b] italic font-serif">
+                      « {character.house.motto} »
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={handleToggleBorrowHouseTrait}
+                  className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center space-x-1.5 transition-all shadow-sm ${
+                    isBorrowedHouseTraitActive
+                      ? 'bg-[#8c4e1a] text-white border border-[#c99738]'
+                      : 'bg-[#291f14] hover:bg-[#3d2c1c] text-[#d4a34b] border border-[#5c4021]'
+                  }`}
+                  title="Emprunter le trait de maison pour 1 Impulsion durant la scène"
+                >
+                  <Zap className="w-3 h-3" />
+                  <span>{isBorrowedHouseTraitActive ? 'Trait Actif' : 'Emprunter Trait (1 Impulsion)'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsHouseModalOpen(true)}
+                  className="px-3 py-1 rounded bg-[#c99738] hover:bg-[#d9a84a] text-black text-xs font-bold flex items-center space-x-1 transition-all shadow"
+                >
+                  <Sliders className="w-3 h-3" />
+                  <span>Personnaliser la Maison</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+              <div className="bg-[#121017] p-2.5 rounded-lg border border-[#261f18] space-y-0.5">
+                <span className="text-[10px] font-mono text-[#a89885] block uppercase">Monde d’Origine :</span>
+                <span className="text-[#fae5b5] font-medium">{character.house.homeworld}</span>
+              </div>
+              <div className="bg-[#121017] p-2.5 rounded-lg border border-[#261f18] space-y-0.5">
+                <span className="text-[10px] font-mono text-[#a89885] block uppercase">Trait Empruntable :</span>
+                <span className="text-[#e09145] font-bold">{character.house.reputationTrait}</span>
+              </div>
+              <div className="bg-[#121017] p-2.5 rounded-lg border border-[#261f18] space-y-0.5">
+                <span className="text-[10px] font-mono text-[#a89885] block uppercase">Sceau & Couleurs :</span>
+                <span className="text-[#c9b79c] truncate block">{character.house.sigil} • {character.house.colors}</span>
+              </div>
+              <div className="bg-[#121017] p-2.5 rounded-lg border border-[#261f18] space-y-0.5">
+                <span className="text-[10px] font-mono text-[#a89885] block uppercase">Domaine Primaire :</span>
+                <span className="text-[#fae5b5] truncate block">{character.house.primaryDomain}</span>
+              </div>
+            </div>
+
+            {(character.house.bannerDescription || character.house.secondaryDomain || character.house.rulerName) && (
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-[#261f18] text-[11px] text-[#a89885]">
+                <div className="flex flex-wrap items-center gap-3">
+                  {character.house.secondaryDomain && (
+                    <span>Domaine Secondaire : <strong className="text-[#c9b79c]">{character.house.secondaryDomain}</strong></span>
+                  )}
+                  {character.house.rulerName && (
+                    <span>Souverain : <strong className="text-[#d4a34b]">{character.house.rulerName}</strong></span>
+                  )}
+                </div>
+                {character.house.bannerDescription && (
+                  <span className="italic truncate max-w-md">Bannière : {character.house.bannerDescription}</span>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -1402,6 +1556,14 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
         onClose={() => setIsAddAssetOpen(false)}
         onAddAsset={handleAddAsset}
         existingAssets={character.assets}
+      />
+
+      {/* House Customizer Modal */}
+      <HouseCustomizerModal
+        isOpen={isHouseModalOpen}
+        onClose={() => setIsHouseModalOpen(false)}
+        currentHouse={character.house}
+        onApplyHouse={handleApplyHouse}
       />
     </div>
   );

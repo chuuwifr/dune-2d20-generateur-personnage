@@ -5,7 +5,8 @@ import {
   PrincipleName, 
   VocationType, 
   Asset, 
-  Talent 
+  Talent,
+  HouseInfo
 } from '../types/dune';
 import { 
   ARCHETYPES_DATA, 
@@ -23,6 +24,11 @@ import {
   generateRandomName 
 } from '../utils/backgroundGenerator';
 import { 
+  getStoredCustomHouses, 
+  generateRandomHouse 
+} from '../utils/houseGenerator';
+import { HouseCustomizerModal } from './HouseCustomizerModal';
+import { 
   Sparkles, 
   ChevronRight, 
   ChevronLeft, 
@@ -38,7 +44,12 @@ import {
   Plus,
   Trash2,
   Dice5,
-  Dices
+  Dices,
+  Sliders,
+  Edit3,
+  Search,
+  Crown,
+  Globe
 } from 'lucide-react';
 
 interface CreationWizardProps {
@@ -55,6 +66,11 @@ export const CreationWizard: React.FC<CreationWizardProps> = ({
   onOpenBackstoryGen,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isHouseModalOpen, setIsHouseModalOpen] = useState(false);
+  const [houseToCustomize, setHouseToCustomize] = useState<HouseInfo>(character.house);
+  const [houseSearch, setHouseSearch] = useState('');
+  const [houseFilter, setHouseFilter] = useState<'all' | 'grandes' | 'majeures' | 'mineures' | 'factions' | 'custom'>('all');
+  const [customHousesList, setCustomHousesList] = useState<HouseInfo[]>(() => getStoredCustomHouses());
 
   // Steps definition
   const steps = [
@@ -67,6 +83,53 @@ export const CreationWizard: React.FC<CreationWizardProps> = ({
     { num: 7, title: 'Atouts', icon: Briefcase },
     { num: 8, title: 'Finitions & Traits', icon: Check },
   ];
+
+  // ================= House Customization Helpers =================
+  const handleApplyHouse = (h: HouseInfo) => {
+    const updatedTraits = character.traits.filter((t) => t.type !== 'maison');
+    updatedTraits.push({
+      id: `trait-house-${Date.now()}`,
+      name: `${h.name} (${h.reputationTrait})`,
+      type: 'maison',
+      effectHint: `Permet d’emprunter le trait "${h.reputationTrait}" pour 1 Impulsion durant une scène`,
+    });
+    setCharacter((prev) => ({ 
+      ...prev, 
+      house: h, 
+      traits: updatedTraits,
+      backstory: {
+        ...prev.backstory,
+        originPlanet: prev.backstory.originPlanet || h.homeworld.split('(')[0].trim(),
+      }
+    }));
+    setCustomHousesList(getStoredCustomHouses());
+  };
+
+  const allAvailableHouses: HouseInfo[] = React.useMemo(() => {
+    const presetNames = new Set(PRESET_HOUSES.map((p) => p.name.toLowerCase()));
+    const uniqueCustom = customHousesList.filter((c) => !presetNames.has(c.name.toLowerCase()));
+    return [...uniqueCustom, ...PRESET_HOUSES];
+  }, [customHousesList]);
+
+  const displayedHouses = React.useMemo(() => {
+    return allAvailableHouses.filter((h) => {
+      if (houseFilter === 'grandes' && h.type !== 'Grande Maison') return false;
+      if (houseFilter === 'majeures' && h.type !== 'Maison majeure') return false;
+      if (houseFilter === 'mineures' && h.type !== 'Maison mineure' && h.type !== 'Maison naissante') return false;
+      if (houseFilter === 'factions' && h.type !== 'Faction / Ordre') return false;
+      if (houseFilter === 'custom' && !h.isCustom) return false;
+
+      if (!houseSearch.trim()) return true;
+      const q = houseSearch.toLowerCase();
+      return (
+        h.name.toLowerCase().includes(q) ||
+        h.reputationTrait.toLowerCase().includes(q) ||
+        h.homeworld.toLowerCase().includes(q) ||
+        h.primaryDomain.toLowerCase().includes(q) ||
+        (h.motto && h.motto.toLowerCase().includes(q))
+      );
+    });
+  }, [allAvailableHouses, houseFilter, houseSearch]);
 
   // ================= Step 1: Vocation & Concept =================
   const handleSelectVocation = (voc: VocationType) => {
@@ -445,42 +508,158 @@ export const CreationWizard: React.FC<CreationWizardProps> = ({
               />
             </div>
 
-            {/* House selection */}
-            <div className="space-y-2">
-              <label className="text-xs font-cinzel font-bold text-[#fae5b5] uppercase tracking-wider block">
-                Maison Noble d'allégeance :
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {PRESET_HOUSES.map((h) => (
-                  <div
-                    key={h.name}
+            {/* House selection & Customization */}
+            <div className="space-y-3 pt-1">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <label className="text-xs font-cinzel font-bold text-[#fae5b5] uppercase tracking-wider block">
+                    Maison Noble d'allégeance :
+                  </label>
+                  <span className="text-[11px] text-[#a89885]">
+                    Sélectionnez votre fief souverain ou forgez votre propre maison noble personnalisée.
+                  </span>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
                     onClick={() => {
-                      const updatedTraits = character.traits.filter((t) => t.type !== 'maison');
-                      updatedTraits.push({
-                        id: `trait-house-${Date.now()}`,
-                        name: `${h.name} (${h.reputationTrait})`,
-                        type: 'maison',
-                        effectHint: `Permet d’emprunter le trait "${h.reputationTrait}" pour 1 Impulsion durant une scène`,
-                      });
-                      setCharacter((prev) => ({ ...prev, house: h, traits: updatedTraits }));
+                      const randomHouse = generateRandomHouse();
+                      handleApplyHouse(randomHouse);
                     }}
-                    className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                      character.house.name === h.name
-                        ? 'bg-[#291e13] border-[#d4a34b] text-[#fae5b5] shadow-md'
-                        : 'bg-[#18161d] border-[#2e261d] text-[#a89885] hover:border-[#523d24]'
-                    }`}
+                    className="px-2.5 py-1.5 rounded-lg bg-[#261d15] hover:bg-[#3d2a1b] text-[#e09145] hover:text-[#fae5b5] border border-[#523b24] text-xs font-medium flex items-center space-x-1.5 transition-all shadow"
+                    title="Générer une maison noble aléatoire complète"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-cinzel font-bold text-sm text-[#fae5b5]">{h.name}</span>
-                      <span className="text-[10px] text-[#d4a34b] font-mono">{h.type}</span>
+                    <Dice5 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Maison Aléatoire</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHouseToCustomize(character.house);
+                      setIsHouseModalOpen(true);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-[#c99738] hover:bg-[#d9a84a] text-black text-xs font-bold flex items-center space-x-1.5 transition-all shadow-md"
+                  >
+                    <Sliders className="w-3.5 h-3.5" />
+                    <span>Personnaliser sa Maison</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Search & Category Filter Toolbar */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+                <div className="relative flex-1">
+                  <Search className="w-3.5 h-3.5 text-[#8c7d6c] absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    value={houseSearch}
+                    onChange={(e) => setHouseSearch(e.target.value)}
+                    placeholder="Filtrer les maisons par nom, trait, monde ou domaine..."
+                    className="w-full bg-[#0d0e12] border border-[#3d2f21] rounded-lg pl-9 pr-3 py-1.5 text-xs text-[#fae5b5] focus:outline-none focus:border-[#d4a34b]"
+                  />
+                  {houseSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setHouseSearch('')}
+                      className="absolute right-2.5 top-2 text-[#8c7d6c] hover:text-white text-xs"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1 text-[11px]">
+                  {[
+                    { id: 'all', label: 'Toutes' },
+                    { id: 'grandes', label: 'Grandes Maisons' },
+                    { id: 'majeures', label: 'Majeures' },
+                    { id: 'mineures', label: 'Mineures & Naissantes' },
+                    { id: 'factions', label: 'Factions' },
+                    { id: 'custom', label: 'Personnalisées' },
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setHouseFilter(f.id as any)}
+                      className={`px-2.5 py-1 rounded text-xs transition-all ${
+                        houseFilter === f.id
+                          ? 'bg-[#c99738]/20 text-[#fae5b5] border border-[#c99738]/40 font-semibold'
+                          : 'bg-[#18161f] text-[#8c7d6c] hover:text-[#c9b79c] border border-[#2b221a]'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Combined Houses Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[380px] overflow-y-auto pr-1">
+                {displayedHouses.map((h) => {
+                  const isSelected = character.house.name === h.name;
+
+                  return (
+                    <div
+                      key={h.id || h.name}
+                      onClick={() => handleApplyHouse(h)}
+                      className={`p-3 rounded-lg border cursor-pointer transition-all flex flex-col justify-between ${
+                        isSelected
+                          ? 'bg-[#291e13] border-[#d4a34b] text-[#fae5b5] shadow-lg ring-1 ring-[#d4a34b]/60'
+                          : 'bg-[#18161d] border-[#2e261d] text-[#a89885] hover:border-[#523d24] hover:bg-[#1f1b24]'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-cinzel font-bold text-sm text-[#fae5b5] truncate">{h.name}</span>
+                          <span className="text-[10px] text-[#d4a34b] font-mono shrink-0 ml-1">{h.type}</span>
+                        </div>
+                        {h.motto && (
+                          <p className="text-[10px] text-[#c9b79c] italic truncate mt-0.5">« {h.motto} »</p>
+                        )}
+                        <p className="text-xs text-[#a89885] mt-1 line-clamp-1">{h.primaryDomain}</p>
+                      </div>
+
+                      <div className="mt-2 pt-2 border-t border-[#2a241e] flex items-center justify-between text-[11px]">
+                        <div>
+                          <span>Trait : <strong className="text-[#e09145]">{h.reputationTrait}</strong></span>
+                          <div className="text-[10px] text-[#7d6e5d] truncate max-w-[150px]">{h.homeworld}</div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setHouseToCustomize(h);
+                            setIsHouseModalOpen(true);
+                          }}
+                          className="px-2 py-1 rounded bg-[#231b14] hover:bg-[#3d2c1c] text-[#d4a34b] border border-[#5c4021] text-[10px] flex items-center space-x-1"
+                          title="Modifier ou dupliquer cette maison noble"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                          <span>Modifier</span>
+                        </button>
+                      </div>
                     </div>
-                    <p className="text-xs text-[#a89885] mt-1">{h.primaryDomain}</p>
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#2a241e] text-[11px]">
-                      <span>Trait : <strong className="text-[#e09145]">{h.reputationTrait}</strong></span>
-                      <span>{h.homeworld}</span>
-                    </div>
+                  );
+                })}
+
+                {displayedHouses.length === 0 && (
+                  <div className="col-span-full text-center py-8 text-xs text-[#8c7d6c]">
+                    Aucune maison ne correspond à votre recherche.
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setHouseSearch('');
+                        setHouseFilter('all');
+                      }}
+                      className="ml-2 text-[#d4a34b] underline"
+                    >
+                      Réinitialiser les filtres
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -1118,6 +1297,14 @@ export const CreationWizard: React.FC<CreationWizardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* House Customizer Modal */}
+      <HouseCustomizerModal
+        isOpen={isHouseModalOpen}
+        onClose={() => setIsHouseModalOpen(false)}
+        currentHouse={houseToCustomize}
+        onApplyHouse={handleApplyHouse}
+      />
     </div>
   );
 };

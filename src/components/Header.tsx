@@ -7,7 +7,8 @@ import {
   BookOpen, 
   Wand2, 
   Compass,
-  Users
+  Users,
+  Shield
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -16,6 +17,7 @@ interface HeaderProps {
   openDiceModal: () => void;
   openPdfModal: () => void;
   openRulesModal: () => void;
+  openHouseModal?: () => void;
   characterName: string;
 }
 
@@ -25,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
   openDiceModal,
   openPdfModal,
   openRulesModal,
+  openHouseModal,
   characterName,
 }) => {
   return (
@@ -103,6 +106,17 @@ export const Header: React.FC<HeaderProps> = ({
               <Users className="w-4 h-4 text-[#d4a34b]" />
               <span>Prétirés & Codex</span>
             </button>
+
+            {openHouseModal && (
+              <button
+                onClick={openHouseModal}
+                className="px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-all flex items-center space-x-2 text-[#c2b49d] hover:bg-[#1f1b15] hover:text-[#fae5b5]"
+                title="Gérer ou personnaliser votre Maison Noble"
+              >
+                <Shield className="w-4 h-4 text-[#d4a34b]" />
+                <span>Maisons Nobles</span>
+              </button>
+            )}
           </nav>
 
           {/* Quick Actions Right */}
@@ -169,6 +183,14 @@ export const Header: React.FC<HeaderProps> = ({
           >
             Prétirés
           </button>
+          {openHouseModal && (
+            <button
+              onClick={openHouseModal}
+              className="px-2.5 py-1 rounded text-xs whitespace-nowrap text-[#a89885] hover:text-[#fae5b5]"
+            >
+              Maisons
+            </button>
+          )}
         </div>
       </div>
     </header>

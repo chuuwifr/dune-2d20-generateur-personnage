@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DuneCharacter, SkillName, PrincipleName } from './types/dune';
+import { DuneCharacter, SkillName, PrincipleName, HouseInfo } from './types/dune';
 import { PRESET_CHARACTERS } from './data/duneData';
 import { Header } from './components/Header';
 import { CharacterSheet } from './components/CharacterSheet';
@@ -9,6 +9,7 @@ import { DiceSimulatorModal } from './components/DiceSimulatorModal';
 import { PdfExportModal } from './components/PdfExportModal';
 import { RulesCheatSheetModal } from './components/RulesCheatSheetModal';
 import { PresetsModal } from './components/PresetsModal';
+import { HouseCustomizerModal } from './components/HouseCustomizerModal';
 import { 
   Sparkles, 
   Dices, 
@@ -33,6 +34,23 @@ export default function App() {
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [isBackstoryModalOpen, setIsBackstoryModalOpen] = useState(false);
   const [isPresetsModalOpen, setIsPresetsModalOpen] = useState(false);
+  const [isHouseModalOpen, setIsHouseModalOpen] = useState(false);
+
+  // Apply house updates to character state
+  const handleApplyHouse = (updatedHouse: HouseInfo) => {
+    const updatedTraits = character.traits.filter((t) => t.type !== 'maison');
+    updatedTraits.push({
+      id: `trait-house-${Date.now()}`,
+      name: `${updatedHouse.name} (${updatedHouse.reputationTrait})`,
+      type: 'maison',
+      effectHint: `Permet d’emprunter le trait "${updatedHouse.reputationTrait}" pour 1 Impulsion durant une scène`,
+    });
+    setCharacter((prev) => ({
+      ...prev,
+      house: updatedHouse,
+      traits: updatedTraits,
+    }));
+  };
 
   // Quick dice test trigger from character sheet
   const handleOpenDiceTest = (skill?: SkillName, principle?: PrincipleName) => {
@@ -59,6 +77,7 @@ export default function App() {
         openDiceModal={() => handleOpenDiceTest()}
         openPdfModal={() => setIsPdfModalOpen(true)}
         openRulesModal={() => setIsRulesModalOpen(true)}
+        openHouseModal={() => setIsHouseModalOpen(true)}
         characterName={character.name}
       />
 
@@ -239,6 +258,13 @@ export default function App() {
           setCharacter(newChar);
           setCurrentView('sheet');
         }}
+      />
+
+      <HouseCustomizerModal
+        isOpen={isHouseModalOpen}
+        onClose={() => setIsHouseModalOpen(false)}
+        currentHouse={character.house}
+        onApplyHouse={handleApplyHouse}
       />
     </div>
   );

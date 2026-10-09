@@ -14,7 +14,7 @@ export type VocationType =
   | 'Fremen' 
   | 'Agent de la Guilde';
 
-export type HouseType = 'Maison naissante' | 'Maison mineure' | 'Maison majeure' | 'Grande Maison';
+export type HouseType = 'Maison naissante' | 'Maison mineure' | 'Maison majeure' | 'Grande Maison' | 'Faction / Ordre';
 
 export interface PrincipleScore {
   name: PrincipleName;
@@ -58,6 +58,7 @@ export interface CharacterTrait {
 }
 
 export interface HouseInfo {
+  id?: string;
   name: string;
   type: HouseType;
   homeworld: string;
@@ -67,6 +68,11 @@ export interface HouseInfo {
   colors: string;
   sigil: string;
   bannerDescription?: string;
+  motto?: string;
+  rulerTitle?: string;
+  rulerName?: string;
+  notes?: string;
+  isCustom?: boolean;
 }
 
 export interface BackstoryDetails {
