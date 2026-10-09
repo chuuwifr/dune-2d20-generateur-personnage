@@ -15,7 +15,7 @@ La page blanche sur GitHub Pages provient généralement de deux causes :
 Tout a été corrigé pour fonctionner automatiquement selon la méthode de votre choix :
 
 ### Méthode 1 : Via GitHub Actions (Recommandé & 100% Automatique)
-Le workflow `.github/workflows/deploy.yml` compile automatiquement le projet et le déploie à chaque push.
+Le workflow `.github/workflows/static.yml` compile automatiquement le projet avec Node/Vite et déploie le dossier `dist/` à chaque push.
 
 1. Rendez-vous sur votre dépôt GitHub.
 2. Allez dans **Settings** > **Pages**.
