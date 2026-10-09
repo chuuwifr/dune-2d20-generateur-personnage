@@ -2,31 +2,46 @@
 
 Assistant complet de création et gestion de fiches de personnages pour le jeu de rôle **Dune: Aventures dans l'Imperium** (système 2d20 de Modiphius).
 
-Entièrement autonome, côté client (aucun serveur ou clé API requis), optimisé pour le web statique, Netlify et **GitHub Pages**.
+Entièrement autonome, 100% côté client (aucun serveur ni clé API requis), optimisé pour le web statique, Netlify et **GitHub Pages**.
 
-## Déploiement sur GitHub Pages
+---
 
-### Méthode 1 : GitHub Actions (Recommandé & Automatique)
-Le workflow GitHub Actions `.github/workflows/deploy.yml` est déjà inclus dans le dépôt.
+## Déploiement sur GitHub Pages (Résolution de la page blanche)
 
-1. Poussez votre code sur votre dépôt GitHub (branche `main`).
-2. Rendez-vous sur votre dépôt dans **Settings** > **Pages**.
-3. Dans **Build and deployment** > **Source**, sélectionnez **GitHub Actions**.
-4. Le workflow va se déclencher automatiquement à chaque commit sur `main` et déployer le site.
+La page blanche sur GitHub Pages provient généralement de deux causes :
+1. **Source mal configurée** : Si GitHub Pages est réglé sur `Deploy from a branch > main / (root)`, il tente de servir le code source non compilé (`/src/main.tsx`), ce que les navigateurs ne peuvent pas interpréter.
+2. **Chemins d'accès (Base URL)** : Sur GitHub Pages, le site est servi sous `https://<pseudo>.github.io/<nom-du-repo>/`. Sans configuration appropriée du sous-dossier, le navigateur cherche les scripts à la racine du domaine (`https://<pseudo>.github.io/assets/...`) au lieu de `.../<nom-du-repo>/assets/...`, provoquant des erreurs 404.
 
-### Méthode 2 : Déploiement manuel via gh-pages
-Si vous préférez déployer manuellement la branche `gh-pages` :
-```bash
-npm install
-npm run build
-# Le dossier généré dist/ est autonome avec des chemins relatifs et prêt à être servi.
-```
+Tout a été corrigé pour fonctionner automatiquement selon la méthode de votre choix :
 
-## Fonctionnalités
-- Assistant pas-à-pas de création (Maison, Concept, Rôle, Compétences, Principes, Talents, Atouts, Détails)
-- Fiche de personnage interactive avec modification directe de chaque élément
-- Générateur d'historique et de concept immersif (sans dépendance IA)
-- Simulateur de lancers de dés 2d20 avec calcul automatique des succès, complications et momentum
-- Export PDF de la fiche de personnage
-- Sauvegarde et chargement de pré-tirés
-- Aide-mémoire complet des règles du système 2d20
+### Méthode 1 : Via GitHub Actions (Recommandé & 100% Automatique)
+Le workflow `.github/workflows/deploy.yml` compile automatiquement le projet et le déploie à chaque push.
+
+1. Rendez-vous sur votre dépôt GitHub.
+2. Allez dans **Settings** > **Pages**.
+3. Dans **Build and deployment** > **Source**, choisissez **GitHub Actions** (au lieu de "Deploy from a branch").
+4. Faites un `git push` sur la branche `main` (ou lancez le workflow manuellement dans l'onglet **Actions**).
+5. GitHub Actions compile le projet et publie le site sans page blanche !
+
+### Méthode 2 : En 1 seule commande avec `npm run deploy`
+Si vous préférez utiliser la méthode par branche `gh-pages` :
+
+1. Dans votre terminal :
+   ```bash
+   npm run deploy
+   ```
+   *(Cette commande compile le projet et pousse automatiquement le dossier `dist` sur la branche `gh-pages`)*
+2. Allez dans **Settings** > **Pages**.
+3. Dans **Build and deployment** > **Source**, choisissez **Deploy from a branch**.
+4. Sélectionnez la branche **`gh-pages`** et le dossier **`/(root)`**, puis cliquez sur **Save**.
+
+---
+
+## Fonctionnalités de l'application
+- **Assistant pas-à-pas de création** (Maison, Concept, Rôle, Compétences, Principes, Talents, Atouts, Détails)
+- **Fiche de personnage interactive** avec modification directe de chaque élément
+- **Générateur d'historique et de concept immersif** (100% autonome, sans dépendance externe)
+- **Simulateur de lancers de dés 2d20** avec calcul automatique des succès, complications et momentum
+- **Export PDF** de la fiche de personnage
+- **Sauvegarde et chargement de pré-tirés** (Kara Molay, Paul, etc.)
+- **Aide-mémoire complet** des règles officielles du système 2d20

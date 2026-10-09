@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dune 2d20 - Redirection</title>
+    <script>
+      // Redirection automatique GitHub Pages vers l'accueil
+      var path = window.location.pathname;
+      var repo = path.split('/')[1];
+      if (repo) {
+        window.location.replace('/' + repo + '/');
+      } else {
+        window.location.replace('/');
+      }
+    </script>
+  </head>
+  <body style="background: #0b0c10; color: #d4a34b; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+    <p>Redirection vers l'application Dune 2d20...</p>
+  </body>
+</html>
