@@ -3,8 +3,14 @@ import App from './App.tsx';
 import {ErrorBoundary} from './components/ErrorBoundary.tsx';
 import './index.css';
 
-createRoot(document.getElementById('root')!).render(
-  <ErrorBoundary>
-    <App />
-  </ErrorBoundary>
-);
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  createRoot(rootElement).render(
+    <div data-dune-loaded="true">
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </div>
+  );
+  (window as unknown as { __DUNE_LOADED__?: boolean }).__DUNE_LOADED__ = true;
+}

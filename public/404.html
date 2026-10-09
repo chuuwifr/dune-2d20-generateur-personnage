@@ -5,10 +5,10 @@
     <title>Dune 2d20 - Redirection</title>
     <script>
       // Redirection automatique GitHub Pages vers l'accueil
-      var path = window.location.pathname;
-      var repo = path.split('/')[1];
-      if (repo) {
-        window.location.replace('/' + repo + '/');
+      var pathSegments = window.location.pathname.split('/').filter(Boolean);
+      var firstSegment = pathSegments[0];
+      if (firstSegment && !firstSegment.includes('.') && firstSegment !== '404') {
+        window.location.replace('/' + firstSegment + '/');
       } else {
         window.location.replace('/');
       }

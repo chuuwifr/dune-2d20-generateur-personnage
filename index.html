@@ -16,13 +16,49 @@
       (function() {
         var path = window.location.pathname;
         if (path && !path.endsWith('/') && !path.split('/').pop().includes('.')) {
-          window.location.replace(path + '/' + window.location.search + window.location.hash);
+          window.location.replace(path + '/' + (window.location.search || '') + (window.location.hash || ''));
         }
       })();
     </script>
   </head>
-  <body class="bg-[#0b0c10] text-[#e0d6c3] antialiased selection:bg-[#c99738]/30 selection:text-[#fae5b5]">
-    <div id="root"></div>
+  <body style="background-color: #0b0c10; color: #e0d6c3; margin: 0; min-height: 100vh;" class="bg-[#0b0c10] text-[#e0d6c3] antialiased selection:bg-[#c99738]/30 selection:text-[#fae5b5]">
+    <div id="root">
+      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #0b0c10; color: #d4a34b; font-family: 'Cinzel', serif, sans-serif; text-align: center; padding: 20px;">
+        <div style="font-size: 26px; font-weight: 700; letter-spacing: 0.15em; margin-bottom: 8px; text-transform: uppercase;">
+          Dune 2d20
+        </div>
+        <div style="font-size: 13px; color: #a89885; letter-spacing: 0.08em; font-family: system-ui, -apple-system, sans-serif;">
+          Chargement de l'assistant dans l'Imperium...
+        </div>
+        <div style="margin-top: 24px; width: 36px; height: 36px; border: 3px solid rgba(212, 163, 75, 0.2); border-top-color: #d4a34b; border-radius: 50%; animation: dune-spin 1s linear infinite;"></div>
+        <style>
+          @keyframes dune-spin { to { transform: rotate(360deg); } }
+        </style>
+      </div>
+    </div>
+    <div id="loading-error" style="display: none; position: fixed; inset: 0; background: #0b0c10; color: #f87171; font-family: system-ui, sans-serif; padding: 24px; z-index: 9999; overflow: auto;">
+      <div style="max-width: 600px; margin: 40px auto; background: #181214; border: 1px solid #7f1d1d; border-radius: 8px; padding: 20px;">
+        <h2 style="color: #ef4444; margin-top: 0; font-size: 18px;">Impossible de charger l'application</h2>
+        <p style="color: #e5e7eb; font-size: 14px;">Une ressource n'a pas pu être chargée ou un problème de chemin est survenu.</p>
+        <pre id="loading-error-details" style="background: #090607; padding: 12px; border-radius: 4px; font-size: 12px; color: #fca5a5; overflow-x: auto; white-space: pre-wrap;"></pre>
+        <button onclick="window.location.reload()" style="margin-top: 16px; padding: 8px 16px; background: #b91c1c; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px;">
+          Recharger
+        </button>
+      </div>
+    </div>
+    <script>
+      window.addEventListener('error', function(e) {
+        var root = document.getElementById('root');
+        if (root && root.querySelector('[data-dune-loaded]') === null && !window.__DUNE_LOADED__) {
+          var errDiv = document.getElementById('loading-error');
+          var errPre = document.getElementById('loading-error-details');
+          if (errDiv && errPre) {
+            errDiv.style.display = 'block';
+            errPre.textContent = (e.message || 'Erreur inconnue') + (e.filename ? '\nFichier : ' + e.filename + (e.lineno ? ':' + e.lineno : '') : '');
+          }
+        }
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
